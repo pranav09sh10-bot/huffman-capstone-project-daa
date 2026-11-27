@@ -1,0 +1,1 @@
+Huffman coding is a lossless compression technique. Frequent characters get short codes and rare characters get long codes. The result is a prefix-free code, so no code is the beginning of another code and decoding is never ambiguous. Compression works best on text with a skewed character distribution, such as English sentences, source code, and log files.

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huffman File Compressor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <h1>Huffman File Compressor</h1>
+  <p>Shrink text files with Huffman coding. See the frequencies, the tree, the codes, and the exact size saved.</p>
+</header>
+
+<main>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="compress" role="tab">Compress</button>
+    <button class="tab" data-tab="decompress" role="tab">Decompress</button>
+    <button class="tab" data-tab="theory" role="tab">Complexity</button>
+  </nav>
+
+  <!-- COMPRESS -->
+  <section id="compress" class="panel active">
+    <div class="input-box">
+      <label class="drop" id="drop">
+        <input type="file" id="cFile" accept=".txt,.csv,.json,.md,.py,.html,.log,text/*">
+        <span id="cFileName">Choose a text file, or drop it here</span>
+      </label>
+      <textarea id="cText" rows="5" placeholder="...or paste text here"></textarea>
+      <button id="cBtn" class="primary">Compress</button>
+      <p id="cErr" class="error" hidden></p>
+    </div>
+
+    <div id="cResult" hidden>
+      <div class="sizes">
+        <div class="size-line">
+          <span class="lbl">Original</span>
+          <div class="bar"><i id="barOrig" style="width:100%"></i></div>
+          <b id="sOrig"></b>
+        </div>
+        <div class="size-line">
+          <span class="lbl">Compressed</span>
+          <div class="bar"><i id="barComp" class="comp"></i></div>
+          <b id="sComp"></b>
+        </div>
+        <p id="verdict" class="verdict"></p>
+        <button id="dlBtn" class="primary">Download .huff file</button>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <h2>Code table</h2>
+      <p class="hint">Frequent symbols get short codes. Sorted by frequency.</p>
+      <div class="scroll">
+        <table id="codeTable">
+          <thead><tr><th>Symbol</th><th>Frequency</th><th>Huffman code</th><th>Length</th><th>Total bits</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2>Huffman tree</h2>
+      <p class="hint">Left branch = 0, right branch = 1. Click a node to collapse it.</p>
+      <div class="tree scroll" id="tree"></div>
+
+      <h2>Timing</h2>
+      <div class="timing" id="timing"></div>
+    </div>
+  </section>
+
+  <!-- DECOMPRESS -->
+  <section id="decompress" class="panel">
+    <div class="input-box">
+      <label class="drop">
+        <input type="file" id="dFile" accept=".huff">
+        <span id="dFileName">Choose a .huff file</span>
+      </label>
+      <button id="dBtn" class="primary">Decompress</button>
+      <p id="dErr" class="error" hidden></p>
+    </div>
+    <div id="dResult" hidden>
+      <p class="verdict" id="dInfo"></p>
+      <pre id="dPreview" class="preview"></pre>
+      <button id="dlRestore" class="primary">Download restored file</button>
+    </div>
+  </section>
+
+  <!-- THEORY -->
+  <section id="theory" class="panel">
+    <h2>Time and space complexity</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Step</th><th>Time</th><th>Space</th></tr></thead>
+      <tbody>
+        <tr><td>Count frequencies</td><td>O(n)</td><td>O(k)</td></tr>
+        <tr><td>Build tree (min-heap)</td><td>O(k log k)</td><td>O(k)</td></tr>
+        <tr><td>Generate codes</td><td>O(k)</td><td>O(k)</td></tr>
+        <tr><td>Encode</td><td>O(n)</td><td>O(n) output</td></tr>
+        <tr><td>Decode</td><td>O(n)</td><td>O(n) output</td></tr>
+        <tr><td><b>Whole compression</b></td><td><b>O(n + k log k)</b></td><td><b>O(n + k)</b></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">n = number of bytes in the file. k = number of distinct symbols (at most 256 for bytes), so k log k is a small constant and the practical cost is O(n).</p>
+
+    <h2>Why it works</h2>
+    <p class="note">Huffman coding is a greedy algorithm: it always merges the two least frequent nodes. This gives an optimal prefix-free code, so the average code length L satisfies H ≤ L &lt; H + 1, where H is the Shannon entropy shown in the statistics.</p>
+
+    <h2>Limits</h2>
+    <p class="note">The frequency table is stored in the file (5 bytes per symbol). For very small files this header can make the output larger than the original. Files with uniform random bytes (already compressed or encrypted data) cannot be shrunk.</p>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
